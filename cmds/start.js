@@ -13,7 +13,7 @@ const configDir = 'config/'
 
 // setup mqtt client
 const cbmeta = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../.cb-cli/cbmeta')).toString());
-const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../system.json')).toString());
+const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../system.json')).toString());
 const options = {
   systemKey: systemJson.system_key,
   systemSecret: systemJson.system_secret,
@@ -25,18 +25,22 @@ const options = {
     authToken: cbmeta.token
   }
 };
-cb.init(options);
-const msg = cb.Messaging({}, () => {
-  console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-});
 
-// watch files
-const watcher = chokidar.watch(`./portals/${portalName}/config/`);
-watcher.on('change', (filepath) => {
-  const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
-  const thePayload = utils.parseChangedFilePath(slicedPath);
-  if (thePayload) {
-    console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
-    msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
-  }
-})
+module.exports = function() {
+  cb.init(options);
+  const msg = cb.Messaging({}, () => {
+    console.log(chalk.green(`MQTT connected on port ${messagePort}`));
+  });
+  
+  // watch files
+  const watcher = chokidar.watch(`./portals/${portalName}/config/`);
+  watcher.on('change', (filepath) => {
+    const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
+    const thePayload = utils.parseChangedFilePath(slicedPath);
+    if (thePayload) {
+      console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
+      msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
+    }
+  })
+}
+
