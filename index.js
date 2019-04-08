@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const cb = require('clearblade');
 const utils = require('./socketMessageUtils');
-const flags = require('./processFlags');
+const flags = require('../../../processFlags');
 
 // constants
 const messagePort = flags.messagePort || 1883;
@@ -31,7 +31,7 @@ const msg = cb.Messaging({}, () => {
 });
 
 // watch files
-const watcher = chokidar.watch(`../../../portals/${portalName}/config/`);
+const watcher = chokidar.watch(`./portals/${portalName}/config/`);
 watcher.on('change', (filepath) => {
   const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
   const thePayload = utils.parseChangedFilePath(slicedPath);

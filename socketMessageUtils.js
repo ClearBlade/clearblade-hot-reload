@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const flags = require('./processFlags');
+const flags = require('../../../processFlags');
 const chalk = require('chalk');
 
 // setting consts
