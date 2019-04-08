@@ -1,42 +1,33 @@
-const chalk = require('chalk');
-const chokidar = require('chokidar');
-const fs = require('fs');
-const path = require('path');
-const cb = require('clearblade');
-const utils = require('./socketMessageUtils');
-const flags = require('../../../processFlags');
+const minimist = require('minimist');
 
-// constants
-const messagePort = flags.messagePort || 1883;
-const portalName = flags.portal;
-const configDir = 'config/'
+module.exports = () => {
+  const args = minimist(process.argv.slice(2))
 
-// setup mqtt client
-const cbmeta = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../.cb-cli/cbmeta')).toString());
-const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../system.json')).toString());
-const options = {
-  systemKey: systemJson.system_key,
-  systemSecret: systemJson.system_secret,
-  URI: systemJson.platform_url,
-  messagingURI: systemJson.messaging_url.split(':')[0],
-  messagePort: messagePort,
-  useUser: {
-    email: cbmeta.developer_email,
-    authToken: cbmeta.token
+  let cmd = args._[0] || 'help'
+
+  if (args.version || args.v) {
+    cmd = 'version'
   }
-};
-cb.init(options);
-const msg = cb.Messaging({}, () => {
-  console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-});
 
-// watch files
-const watcher = chokidar.watch(`./portals/${portalName}/config/`);
-watcher.on('change', (filepath) => {
-  const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
-  const thePayload = utils.parseChangedFilePath(slicedPath);
-  if (thePayload) {
-    console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
-    msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
+  if (args.help || args.h) {
+    cmd = 'help'
   }
-})
+
+  switch (cmd) {
+    case 'start':
+      require('./cmds/start')(args)
+      break
+
+    case 'version':
+      require('./cmds/version')(args)
+      break
+
+    case 'help':
+      require('./cmds/help')(args)
+      break
+
+    default:
+      console.error(`"${cmd}" is not a valid command`)
+      break
+  }
+}

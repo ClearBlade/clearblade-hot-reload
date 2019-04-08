@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const flags = require('../../../processFlags');
+const flags = require('../../../../processFlags');
 const chalk = require('chalk');
 
 // setting consts
@@ -17,7 +17,7 @@ const iRMetaFile = `meta.json`;
 
 // path consts
 const portalName = flags.portal;
-const configPath = `../../../portals/${portalName}/config`;
+const configPath = `../../../../portals/${portalName}/config`;
 const widgetsPathname = `widgets`;
 const dsPathname = 'datasources';
 const iRPathname = 'internalResources';
