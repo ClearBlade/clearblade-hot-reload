@@ -2,10 +2,10 @@
   "name": "@clearblade/clearblade-hot-reload",
   "version": "1.0.0",
   "description": "MQTT connection package for hot-reloading in portal development",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "chalk": "^2.4.2",
-    "clearblade": "^1.12.2",
+    "clearblade": "^1.12.3",
     "fs": "0.0.1-security",
     "path": "^0.12.7"
   }

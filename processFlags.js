@@ -13,7 +13,7 @@ const parserName = 'parserName';
 const parserType = 'parserType';
 const service = 'service';
 const library = 'library';
-const socketPort = 'socketPort';
+const messagePort = 'messagePort';
 
 const mapEntityToWebpackConfig = (entity) => {
   switch (entity) {
@@ -28,7 +28,7 @@ const mapEntityToWebpackConfig = (entity) => {
       return ['service'];
     case library:
       return ['library'];
-    default: // used for socket ports because they have defaults to fall back to in server.js
+    default: // used for messagePort because they have defaults to fall back to in index.js
       return []
   }
 }
@@ -50,7 +50,7 @@ module.exports = {
   parserType: getFlagValue(parserType),
   service: getFlagValue(service),
   library: getFlagValue(library),
-  socketPort: getFlagValue(socketPort),
+  messagePort: getFlagValue(messagePort),
   portalEntries: () => {
     if (module.exports.portal && configName === 'clearblade-hot-reload') {
       const configPath = `./src/portals/${module.exports.portal}/config`;
