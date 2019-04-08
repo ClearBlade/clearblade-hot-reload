@@ -13,7 +13,7 @@ const configDir = 'config/'
 
 // setup mqtt client
 const cbmeta = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../.cb-cli/cbmeta')).toString());
-const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../system.json')).toString());
+const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../system.json')).toString());
 const options = {
   systemKey: systemJson.system_key,
   systemSecret: systemJson.system_secret,
