@@ -8,39 +8,55 @@ const flags = require('../../../../processFlags');
 
 // constants
 const messagePort = flags.messagePort || 1883;
+const useSSL = flags.noSSL ? false : true;
+const caPath = flags.caPath || path.join(__dirname, '../ca.pem');
 const portalName = flags.portal;
 const configDir = 'config/'
 
 // setup mqtt client
 const cbmeta = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../.cb-cli/cbmeta')).toString());
 const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../system.json')).toString());
-const options = {
+const initOptions = {
   systemKey: systemJson.system_key,
   systemSecret: systemJson.system_secret,
   URI: systemJson.platform_url,
   messagingURI: systemJson.messaging_url.split(':')[0],
-  messagePort: messagePort,
+  messagingPort: messagePort,
   useUser: {
     email: cbmeta.developer_email,
     authToken: cbmeta.token
   }
 };
 
+const sslOptions = {};
+if (useSSL === true) {
+  sslOptions.useSSL = true;
+  sslOptions.ca = fs.readFileSync(caPath)
+} else if (systemJson.platform_url.split(':')[0] === 'https') {
+  console.log(chalk.red(`Remove -noSSL flag or set to false to point at local platform`));
+  throw new Error();
+}
+
 module.exports = function() {
-  cb.init(options);
-  const msg = cb.Messaging({}, () => {
-    console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-  });
-  
-  // watch files
-  const watcher = chokidar.watch(`./portals/${portalName}/config/`);
-  watcher.on('change', (filepath) => {
-    const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
-    const thePayload = utils.parseChangedFilePath(slicedPath);
-    if (thePayload) {
-      console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
-      msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
+  cb.init(initOptions);
+  const msg = cb.Messaging({
+    ...sslOptions,
+    onSuccess: () => {
+      console.log(chalk.green(`MQTT connected on port ${messagePort}`));
+      const watcher = chokidar.watch(`./portals/${portalName}/config/`);
+      watcher.on('change', (filepath) => {
+        const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
+        const thePayload = utils.parseChangedFilePath(slicedPath);
+        if (thePayload) {
+          msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
+          console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
+        }
+      })
+    },
+    onFailure: (err) => {
+      console.log(chalk.red(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`));
+      throw new Error();
     }
-  })
+  });
 }
 
