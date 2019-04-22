@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const cb = require('clearblade');
 const utils = require('../utils/socketMessageUtils');
-const flags = require('../../../../processFlags');
+const error = require('../utils/error');
+const flags = require(path.resolve('./cb-dev-kit/processFlags'));
 
 // constants
 const messagePort = flags.messagePort || 1883;
@@ -14,8 +15,8 @@ const portalName = flags.portal;
 const configDir = 'config/'
 
 // setup mqtt client
-const cbmeta = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../.cb-cli/cbmeta')).toString());
-const systemJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../system.json')).toString());
+const cbmeta = JSON.parse(fs.readFileSync(path.resolve('./.cb-cli/cbmeta')).toString());
+const systemJson = JSON.parse(fs.readFileSync(path.resolve('./system.json')).toString());
 const initOptions = {
   systemKey: systemJson.system_key,
   systemSecret: systemJson.system_secret,
@@ -33,8 +34,7 @@ if (useSSL === true) {
   sslOptions.useSSL = true;
   sslOptions.ca = fs.readFileSync(caPath)
 } else if (systemJson.platform_url.split(':')[0] === 'https') {
-  console.log(chalk.red(`Remove -noSSL flag or set to false to point at local platform`));
-  throw new Error();
+  error(`Remove -noSSL flag or set to false to point at local platform`, true);
 }
 
 module.exports = function() {
@@ -54,8 +54,7 @@ module.exports = function() {
       })
     },
     onFailure: (err) => {
-      console.log(chalk.red(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`));
-      throw new Error();
+      error(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`, true);
     }
   });
 }

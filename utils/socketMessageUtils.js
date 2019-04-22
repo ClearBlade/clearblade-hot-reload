@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const flags = require('../../../../processFlags');
+const flags = require(path.resolve('./cb-dev-kit/processFlags'));
 const chalk = require('chalk');
 
 // setting consts
@@ -17,7 +17,7 @@ const iRMetaFile = `meta.json`;
 
 // path consts
 const portalName = flags.portal;
-const configPath = `../../../../portals/${portalName}/config`;
+const configPath = path.resolve(`./portals/${portalName}/config`);
 const widgetsPathname = `widgets`;
 const dsPathname = 'datasources';
 const iRPathname = 'internalResources';
@@ -48,19 +48,19 @@ const findWidgetParserType = (parserObj) => {
 const calculateWidgetParserContent = (parserValuePath, fullResource) => {
   if (typeof parserValuePath === 'object') {
     return  {
-      JavaScript: fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.JavaScript.slice(2)}`)).toString(),
-      HTML: fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.HTML.slice(2)}`)).toString(),
-      CSS: fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.CSS.slice(2)}`)).toString(),
+      JavaScript: fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.JavaScript.slice(2)}`).toString(),
+      HTML: fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.HTML.slice(2)}`).toString(),
+      CSS: fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.CSS.slice(2)}`).toString(),
     }
   } else {
-    return fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.slice(2)}`)).toString()
+    return fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${parserValuePath.slice(2)}`).toString()
   }
 }
 
 const calculateWidgetSettings = (pathArr) => {
   const fullResource = pathArr[1];
-  const widgetMeta = JSON.parse(fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${widgetMetaFile}`)).toString());
-  const widgetSettings = JSON.parse(fs.readFileSync(path.join(__dirname, `${configPath}/${widgetsPathname}/${fullResource}/${widgetSettingsFile}`)).toString());
+  const widgetMeta = JSON.parse(fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${widgetMetaFile}`).toString());
+  const widgetSettings = JSON.parse(fs.readFileSync(`${configPath}/${widgetsPathname}/${fullResource}/${widgetSettingsFile}`).toString());
   const parserSettings = findWidgetParserSettings(widgetSettings);
 
   const returnObj = {
@@ -90,9 +90,9 @@ const calculateWidgetSettings = (pathArr) => {
 
 const calculateDsSettings = (pathArr) => {
   const dsName = pathArr[1];
-  const dsMeta = JSON.parse(fs.readFileSync(path.join(__dirname, `${configPath}/${dsPathname}/${dsName}/${dsMetaFile}`)).toString());
+  const dsMeta = JSON.parse(fs.readFileSync(`${configPath}/${dsPathname}/${dsName}/${dsMetaFile}`).toString());
   if (dsMeta.settings.hasOwnProperty(dsParserName)) {
-    dsMeta.settings[dsParserName] = fs.readFileSync(path.join(__dirname, `${configPath}/${dsPathname}/${dsName}/${dsParserFile}`)).toString();
+    dsMeta.settings[dsParserName] = fs.readFileSync(`${configPath}/${dsPathname}/${dsName}/${dsParserFile}`).toString();
   }
 
   return {
@@ -104,8 +104,8 @@ const calculateDsSettings = (pathArr) => {
 
 const calculateIResourceSettings = (pathArr) => {
   const iRName = pathArr[1];
-  const iRMeta = JSON.parse(fs.readFileSync(path.join(__dirname, `${configPath}/${iRPathname}/${iRName}/${iRMetaFile}`)).toString());
-  iRMeta.file = fs.readFileSync(path.join(__dirname, `${configPath}/${iRPathname}/${iRName}/${iRMeta.file.slice(2)}`)).toString();
+  const iRMeta = JSON.parse(fs.readFileSync(`${configPath}/${iRPathname}/${iRName}/${iRMetaFile}`).toString());
+  iRMeta.file = fs.readFileSync(`${configPath}/${iRPathname}/${iRName}/${iRMeta.file.slice(2)}`).toString();
   iRMeta.lastUpdated = Date.now();
 
   return {
@@ -127,7 +127,7 @@ module.exports = {
       case iRPathname:
         return calculateIResourceSettings(pathArr);
       default:
-        console.error(chalk.red("Resource type not found. Can only hot reload widgets, datasources, internal resource"));
+        error("Resource type not found. Can only hot reload widgets, datasources, internal resource", true);
     }
   }
 }
