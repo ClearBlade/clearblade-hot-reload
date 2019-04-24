@@ -5,7 +5,9 @@
 Clearblade Hot Reload provides an application allowing any changes made to an exported ClearBlade system's portal inside of a code editor to update the portal in real time when the file is saved.
 
 **Highly Recommended**\
-Use ClearBlade Hot Reload integration with [CB Dev Kit](https://github.com/ClearBlade/cb-dev-kit) CLI development tool. 
+Use ClearBlade Hot Reload integration with [CB Dev Kit](https://github.com/ClearBlade/cb-dev-kit) CLI development tool.
+
+![](images/hot-reload.gif "cb-dev-kit clearblade-hot-reload start")
 
 ## Applications
 Clearblade Hot Reload applies to any file changes inside the portal's config directory, including:
