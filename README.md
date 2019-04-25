@@ -7,7 +7,7 @@ Clearblade Hot Reload provides an application allowing any changes made to an ex
 **Highly Recommended**\
 Use ClearBlade Hot Reload integration with [CB Dev Kit](https://github.com/ClearBlade/cb-dev-kit) CLI development tool.
 
-![](images/hot-reload.gif "cb-dev-kit clearblade-hot-reload start")
+![](images/hot-reload.gif "clearblade-hot-reload start")
 
 ## Applications
 Clearblade Hot Reload applies to any file changes inside the portal's config directory, including:
@@ -55,11 +55,11 @@ Clearblade Hot Reload applies to any file changes inside the portal's config dir
 
 1. Install globally if you will be using package on multiple systems (recommended) or install locally to system directory
 ```
-npm i -g clearblade-hot-reload
+npm i -g @clearblade/clearblade-hot-reload
 ```
 or
 ```
-npm i --save-dev clearblade-hot-reload
+npm i --save-dev @clearblade/clearblade-hot-reload
 ```
 
 2. Initialize ClearBlade Hot Reload from within the portal by clicking the icon (displayed below) at the top right of the Dev console on the right side. A success notification should display, else check the console for information on any errors.
