@@ -18,11 +18,12 @@ const configDir = 'config/'
 // setup mqtt client
 const cbmeta = JSON.parse(fs.readFileSync(path.resolve('./.cb-cli/cbmeta')).toString());
 const systemJson = JSON.parse(fs.readFileSync(path.resolve('./system.json')).toString());
+const messageUri = systemJson.messaging_url.split(':')[0];
 const initOptions = {
   systemKey: systemJson.system_key,
   systemSecret: systemJson.system_secret,
   URI: systemJson.platform_url,
-  messagingURI: systemJson.messaging_url.split(':')[0],
+  messagingURI: messageUri,
   messagingPort: messagePort,
   useUser: {
     email: cbmeta.developer_email,
@@ -52,7 +53,7 @@ module.exports = function() {
         const msg = cb.Messaging({
           ...sslOptions,
           onSuccess: () => {
-            console.log(chalk.green(`MQTT connected on port ${messagePort}`));
+            console.log(chalk.green(`MQTT connected to ${messageUri} on port ${messagePort}`));
             const watcher = chokidar.watch(`./portals/${portalName}/config/`);
             watcher.on('change', (filepath) => {
               const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
@@ -64,7 +65,7 @@ module.exports = function() {
             })
           },
           onFailure: (err) => {
-            error(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`, true);
+            error(`Error connecting MQTT to ${messageUri} on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`, true);
           }
         });
       } else if (body.error) {
