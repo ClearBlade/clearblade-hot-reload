@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const flags = require(path.resolve('./cb-dev-kit/processFlags'));
+const flags = require(path.resolve('./.cb-dev-kit/processFlags'));
 const chalk = require('chalk');
 
 // setting consts
