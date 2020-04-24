@@ -9,7 +9,7 @@ const flags = require(path.resolve('./.cb-dev-kit/processFlags'));
 const fetch = require('node-fetch');
 
 // constants
-const messagePort = flags.messagePort || 1883;
+const messagePort = flags.messagePort || 8903;
 const useSSL = flags.noSSL ? false : true;
 const caPath = flags.caPath || path.join(__dirname, '../ca.pem');
 const portalName = flags.portal;
@@ -38,35 +38,34 @@ if (useSSL === true) {
   error(`Remove -noSSL flag or set to false to point at local platform`, true);
 }
 
-module.exports = function() {
-  cb.init(initOptions)
-  fetch(`${initOptions.URI}/admin/checkauth`, {
-    method: 'POST',
-    headers: {
-      'Clearblade-SystemKey': initOptions.systemKey,
-      'ClearBlade-DevToken': initOptions.useUser.authToken,
+const checkAuth = () => fetch(`${initOptions.URI}/admin/checkauth`, {
+  method: 'POST',
+  headers: {
+    'Clearblade-SystemKey': initOptions.systemKey,
+    'ClearBlade-DevToken': initOptions.useUser.authToken,
+  }
+});
+
+let msg;
+
+const onMessagingSuccess = () => {
+  console.log(chalk.green(`MQTT connected on port ${messagePort}`));
+  const watcher = chokidar.watch(`./portals/${portalName}/config/`);
+  watcher.on('change', (filepath) => {
+    const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
+    const thePayload = utils.parseChangedFilePath(slicedPath);
+    if (thePayload) {
+      msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
+      console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
     }
-  }).then((resp) => {
+  })
+}
+
+const initCallback = () => {
+  checkAuth().then((resp) => {
     resp.json().then((body) => {
       if (body.is_authenticated) {
-        const msg = cb.Messaging({
-          ...sslOptions,
-          onSuccess: () => {
-            console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-            const watcher = chokidar.watch(`./portals/${portalName}/config/`);
-            watcher.on('change', (filepath) => {
-              const slicedPath = filepath.slice(filepath.indexOf(configDir) + configDir.length);
-              const thePayload = utils.parseChangedFilePath(slicedPath);
-              if (thePayload) {
-                msg.publish(`clearblade-hot-reload/portal/${portalName}`, JSON.stringify(thePayload));
-                console.log(chalk.green(`Reloading ${slicedPath.split('/')[1]}`));
-              }
-            })
-          },
-          onFailure: (err) => {
-            error(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`, true);
-          }
-        });
+        msg = cb.Messaging(sslOptions, onMessagingSuccess);
       } else if (body.error) {
         error(`Error establishing MQTT connection: ${body.error.message} - ${body.error.detail}`)
       }
@@ -74,5 +73,12 @@ module.exports = function() {
   }).catch((e) => {
     error(`Error checking auth token: ${JSON.stringify(e)}`)
   })
+}
+
+module.exports = function() {
+  cb.init(initOptions)
+  setTimeout(() => {
+    initCallback();
+  }, 4000);
 }
 
