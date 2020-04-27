@@ -9,7 +9,7 @@ const flags = require(path.resolve('./.cb-dev-kit/processFlags'));
 const fetch = require('node-fetch');
 
 // constants
-const messagePort = flags.messagePort || 8903;
+const messagePort = flags.messagePort || 1883;
 const useSSL = flags.noSSL ? false : true;
 const caPath = flags.caPath || path.join(__dirname, '../ca.pem');
 const portalName = flags.portal;
@@ -44,7 +44,7 @@ const checkAuth = () => fetch(`${initOptions.URI}/admin/checkauth`, {
     'Clearblade-SystemKey': initOptions.systemKey,
     'ClearBlade-DevToken': initOptions.useUser.authToken,
   }
-});
+})
 
 let msg;
 
@@ -61,11 +61,18 @@ const onMessagingSuccess = () => {
   })
 }
 
-const initCallback = () => {
+module.exports = function() {
+  cb.init(initOptions)
   checkAuth().then((resp) => {
     resp.json().then((body) => {
       if (body.is_authenticated) {
-        msg = cb.Messaging(sslOptions, onMessagingSuccess);
+        msg = cb.Messaging({
+          ...sslOptions,
+          onSuccess: onMessagingSuccess,
+          onFailure: (err) => {
+            error(`Error connecting MQTT on port ${messagePort}. \nPlease check that the -messagePort is set to correct MQTT port the console is running on. \nAlso, if pointing hotReload at a local platform, please set -noSSL to true. \nIf pointing at a production system and your certificate authority is not DigiCert, you must use -caPath to provide the absolute path of your CA. \nFull Error: ${JSON.stringify(err)}`, true);
+          }
+        });
       } else if (body.error) {
         error(`Error establishing MQTT connection: ${body.error.message} - ${body.error.detail}`)
       }
@@ -73,12 +80,5 @@ const initCallback = () => {
   }).catch((e) => {
     error(`Error checking auth token: ${JSON.stringify(e)}`)
   })
-}
-
-module.exports = function() {
-  cb.init(initOptions)
-  setTimeout(() => {
-    initCallback();
-  }, 4000);
 }
 
