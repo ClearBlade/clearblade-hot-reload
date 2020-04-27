@@ -5,7 +5,8 @@ const path = require('path');
 const cb = require('clearblade');
 const utils = require('../utils/socketMessageUtils');
 const error = require('../utils/error');
-const flags = require(path.resolve('./.cb-dev-kit/processFlags'));
+const devKitPath = require('../utils/getDevKitPath').default;
+const flags = require(path.resolve(`./${devKitPath}/processFlags`));
 const fetch = require('node-fetch');
 
 // constants
