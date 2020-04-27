@@ -9,8 +9,8 @@ const flags = require(path.resolve('./.cb-dev-kit/processFlags'));
 const fetch = require('node-fetch');
 
 // constants
-const messagePort = flags.messagePort || 1883;
 const useSSL = flags.noSSL ? false : true;
+const messagePort = flags.messagePort || useSSL ? 1884 : 1883;
 const caPath = flags.caPath || path.join(__dirname, '../ca.pem');
 const portalName = flags.portal;
 const configDir = 'config/'
@@ -48,7 +48,7 @@ const checkAuth = () => fetch(`${initOptions.URI}/admin/checkauth`, {
 
 let msg;
 
-const onMessagingSuccess = () => {
+const onMessagingSuccess = (err) => {
   console.log(chalk.green(`MQTT connected on port ${messagePort}`));
   const watcher = chokidar.watch(`./portals/${portalName}/config/`);
   watcher.on('change', (filepath) => {
