@@ -59,14 +59,12 @@ const onMessagingSuccess = () => {
   console.log(chalk.green(`MQTT connected on port ${messagePort}`));
   const watchPath = path.join('portals', portalName, 'config');
   console.log('watchPath', watchPath);
-  const watcher = chokidar.watch(watchPath, {
-    cwd: '.'
-  });
+  const watcher = chokidar.watch(watchPath);
   watcher.on("change", (filepath) => {
     console.log('change to', filepath);
     console.log('configDir', configDir);
     const slicedPath = filepath.slice(
-      filepath.indexOf(configDir) + configDir.length
+      filepath.lastIndexOf(configDir) + configDir.length
     );
     const thePayload = utils.parseChangedFilePath(slicedPath);
     if (thePayload) {
