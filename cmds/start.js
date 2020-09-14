@@ -14,7 +14,7 @@ const useSSL = flags.noSSL ? false : true;
 const messagePort = flags.messagePort || useSSL ? 1884 : 1883;
 const caPath = flags.caPath || path.join(__dirname, "../ca.pem");
 const portalName = flags.portal;
-const configDir = "config/";
+const configDir = `config${path.sep}`;
 
 // setup mqtt client
 const cbmeta = JSON.parse(
@@ -55,9 +55,9 @@ const checkAuth = () =>
 
 let msg;
 
-const onMessagingSuccess = (err) => {
+const onMessagingSuccess = () => {
   console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-  const watcher = chokidar.watch(`./portals/${portalName}/config/`);
+  const watcher = chokidar.watch(path.join('.', 'portals', portalName, 'config'));
   watcher.on("change", (filepath) => {
     const slicedPath = filepath.slice(
       filepath.indexOf(configDir) + configDir.length
@@ -68,7 +68,7 @@ const onMessagingSuccess = (err) => {
         `clearblade-hot-reload/portal/${portalName}`,
         JSON.stringify(thePayload)
       );
-      console.log(chalk.green(`Reloading ${slicedPath.split("/")[1]}`));
+      console.log(chalk.green(`Reloading ${slicedPath.split(path.sep)[1]}`));
     }
   });
 };
