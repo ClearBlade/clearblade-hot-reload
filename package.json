@@ -24,9 +24,7 @@
     "chokidar": "^2.1.5",
     "clearblade": "^1.13.0",
     "minimist": "^1.2.0",
-    "node-fetch": "^2.6.0"
-  },
-  "devDependencies": {
+    "node-fetch": "^2.6.0",
     "chalk": "^2.4.2",
     "fs": "0.0.1-security",
     "path": "^0.12.7"
