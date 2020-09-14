@@ -57,12 +57,9 @@ let msg;
 
 const onMessagingSuccess = () => {
   console.log(chalk.green(`MQTT connected on port ${messagePort}`));
-  const watchPath = path.join('portals', portalName, 'config');
-  console.log('watchPath', watchPath);
+  const watchPath = path.join("portals", portalName, "config");
   const watcher = chokidar.watch(watchPath);
   watcher.on("change", (filepath) => {
-    console.log('change to', filepath);
-    console.log('configDir', configDir);
     const slicedPath = filepath.slice(
       filepath.lastIndexOf(configDir) + configDir.length
     );

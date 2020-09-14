@@ -118,10 +118,8 @@ const calculateIResourceSettings = (pathArr) => {
 
 module.exports = {
   parseChangedFilePath: (filePath) => {
-    console.log('parse me', filePath);
     const pathArr = filePath.split(path.sep);
     const resource = pathArr[0];
-    console.log('info', pathArr, resource);
     switch(resource) {
       case widgetsPathname:
         return calculateWidgetSettings(pathArr);
