@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const flags = require(path.resolve('./cb-dev-kit/processFlags'));
-const chalk = require('chalk');
+const devKitPath = require('../utils/getDevKitPath').default;
+const flags = require(path.resolve(`./${devKitPath}/processFlags`));
 
 // setting consts
 const widgetDataTypeSetting = 'dataType';
